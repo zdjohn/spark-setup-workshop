@@ -1,3 +1,5 @@
+# reference https://github.com/databricks/LearningSparkV2/blob/master/chapter3/py/src/Example-3_6.py
+
 from pyspark.sql.types import *
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
