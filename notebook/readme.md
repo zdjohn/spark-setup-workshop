@@ -48,10 +48,16 @@ See more examples in the code repository:
 
 ## 3 Tune and profile your code with magic commands
 
-Jupyter notebook magic commands `%time` `%prun` `%memit` (check [https://ipython.readthedocs.io/en/stable/interactive/magics.html](https://ipython.readthedocs.io/en/stable/interactive/magics.html) for more)
+Jupyter notebook magic commands
+
+- `%time`
+- `%prun`
+- `%memit`
+
+(check [https://ipython.readthedocs.io/en/stable/interactive/magics.html](https://ipython.readthedocs.io/en/stable/interactive/magics.html) for more)
 
 ## 4. Understand your dataframe and ETL Jobs with following methods
 
 - `.show()`
 - `.printSchema()`
-- `explain()`
+- `.explain()`
