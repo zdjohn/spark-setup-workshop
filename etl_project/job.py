@@ -6,7 +6,7 @@
 
 from pyspark.sql import Row
 
-from commons.utils import start_spark
+from etl_project.commons.utils import start_spark
 
 
 def main():
