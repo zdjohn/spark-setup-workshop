@@ -16,7 +16,9 @@ CONFIG_PATH = os.path.join(ROOT_DIR, 'spark.conf')
 
 def get_spark_app_config():
     spark_conf = SparkConf()
+    # todo: replace spark.conf with settings.json
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read(CONFIG_PATH)
 
     for (key, val) in config.items("SPARK_APP_CONFIGS"):

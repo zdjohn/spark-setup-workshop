@@ -1,7 +1,5 @@
 # Experiment with jupyter notebook
 
-WIP
-
 Developing pyspark with jupyter notebooks brings a number of benefits:
 
 1. A interactive dev environment

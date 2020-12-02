@@ -1,8 +1,8 @@
 # reference https://github.com/databricks/LearningSparkV2/blob/master/chapter3/py/src/Example-3_6.py
 
-from pyspark.sql.types import *
+from pyspark.sql.types import IntegerType, StringType, ArrayType, StructType, StructField
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
+import pyspark.sql.functions as F
 
 # define schema for our data
 schema = StructType([
@@ -38,14 +38,13 @@ if __name__ == "__main__":
     blogs_df = spark.createDataFrame(data, schema)
     # show the DataFrame; it should reflect our table above
     blogs_df.show()
-    print()
     # print the schema used by Spark to process the DataFrame
     print(blogs_df.printSchema())
     # Show columns and expressions
-    blogs_df.select(expr("Hits") * 2).show(2)
-    blogs_df.select(col("Hits") * 2).show(2)
-    blogs_df.select(expr("Hits * 2")).show(2)
+    blogs_df.select(F.expr("Hits") * 2).show(2)
+    blogs_df.select(F.col("Hits") * 2).show(2)
+    blogs_df.select(F.expr("Hits * 2")).show(2)
     # show heavy hitters
-    blogs_df.withColumn("Big Hitters", (expr("Hits > 10000"))).show()
+    blogs_df.withColumn("Big Hitters", (F.expr("Hits > 10000"))).show()
     print(blogs_df.schema)
     spark.stop()
