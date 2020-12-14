@@ -22,9 +22,9 @@ hadoop_conf.set("fs.s3a.access.key", access_id)
 hadoop_conf.set("fs.s3a.secret.key", access_key)
 
 
-CATEGORY = 'product_category=Digital_Video_Download'
+CATEGORY = 'product_category=Digital_Video_Games'
 S3_PARQUET_PATH = f's3a://amazon-reviews-pds/parquet/{CATEGORY}/*.snappy.parquet'
-TARGET_S3 = f's3a://pyspark3-sample/{CATEGORY}'
+TARGET_S3 = f's3a://pyspark3-sample/{CATEGORY}.parquet'
 
 
 def main():

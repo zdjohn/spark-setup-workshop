@@ -48,6 +48,4 @@ def action_describe(df: DataFrame, columns: list) -> DataFrame:
 
 
 def load_data_to_s3(df: DataFrame, s3_path: str) -> None:
-    # df.write.parquet(f"{s3_path}", mode="overwrite")
-    print(s3_path)
-    df.show(10)
+    df.write.parquet(f"{s3_path}", mode="overwrite")
