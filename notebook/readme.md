@@ -23,7 +23,7 @@ import findspark
 findspark.init()# todo code here
 ```
 
-### Import sibling package from your project:
+### Import sibling package from your project
 
 Depending on where do you run your jupyter notebook you may came across following error. `No module named 'your_package_name'` even though your package are right there. the cause of it could be a very long story.
 

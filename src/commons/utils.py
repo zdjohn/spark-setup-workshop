@@ -33,9 +33,8 @@ def start_spark(jar_packages=[], files=[]):
 
     spark_builder = SparkSession.builder
 
-    spark_conf = get_spark_app_config()
-
     if flag_debug:
+        spark_conf = get_spark_app_config()
         # create Spark JAR packages string
         spark_jars_packages = ','.join(list(jar_packages))
         spark_builder.config('spark.jars.packages', spark_jars_packages)
