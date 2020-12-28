@@ -3,5 +3,10 @@
     "python.formatting.provider": "autopep8",
     "python.linting.pylintEnabled": true,
     "python.linting.flake8Enabled": false,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.linting.pylintArgs": [
+        "--generated-members=pyspark.*",
+        "--extension-pkg-whitelist=pyspark",
+        "--ignored-modules=pyspark.sql.functions"
+    ]
 }

@@ -7,8 +7,8 @@ from os import environ, listdir, path
 
 from pyspark import SparkConf
 from pyspark import SparkFiles
-from pyspark.sql import SparkSession
-from .spark_log4j import Log4j
+from pyspark.sql import SparkSession, DataFrame
+from src.commons.spark_log4j import Log4j
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT_DIR, 'spark.conf')
@@ -49,3 +49,33 @@ def start_spark(jar_packages=[], files=[]):
     spark_logger = Log4j(spark_session)
 
     return spark_session, spark_logger
+
+
+def extract_data(spark: SparkSession, path: str) -> DataFrame:
+    """Load data from Parquet file format.
+    :param spark: Spark session object.
+    :return: Spark DataFrame.
+    """
+    dataframe = spark.read.parquet(path)
+    return dataframe
+
+
+def action_describe(dataframe: DataFrame, columns: list) -> None:
+    """table statistics, mean, min, max, count, stddev
+
+    Args:
+        df (DataFrame): target dataframe
+        columns (list): columns to describe
+    """
+    df_describe = dataframe.describe(columns)
+    df_describe.show()
+
+
+def action_parquet_to_s3(dataframe: DataFrame, s3_path: str) -> None:
+    """save df into s3 in parquet
+
+    Args:
+        df (DataFrame): transfromed dataframes
+        s3_path (str): target s3 path
+    """
+    dataframe.write.parquet(f"{s3_path}", mode="overwrite")
