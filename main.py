@@ -7,13 +7,17 @@ from pyspark.sql import SparkSession
 
 from src.commons import utils
 import src.amazon_reviews.job as reviews_job
+import src.cross_domain_reviews.job as cross_domain
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--job", help="job name", required=True)
 parser.add_argument("--category", help="review category name")
+parser.add_argument("--source_domain", help="source domain category")
+parser.add_argument("--target_domain", help="target domain category")
 
 JOB_MAPPING = {
-    'review': reviews_job.run
+    'review': reviews_job.run,
+    'cross_domain': cross_domain.run,
 }
 
 

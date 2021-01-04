@@ -1,10 +1,3 @@
-# extract data
-
-# transform data
-
-# load data
-
-
 from src.commons import utils
 from src.amazon_reviews import etl
 
@@ -25,7 +18,7 @@ def run(session, logger, **kwargs):
     # execute ETL pipeline
 
     # read parquet files from s3
-    dataframe = utils.extract_data(session, s3_parquet_path)
+    dataframe = utils.extract_parquet_data(session, s3_parquet_path)
     # get reviewers stats by aggregation
     purchase_agg_df = etl.to_stats_aggregation(dataframe)
     # get user ids based on user item interaction, i.e. minimal 3 reviews, maximun 50 reviews
@@ -33,8 +26,7 @@ def run(session, logger, **kwargs):
     # filter reviews records based on dense user_ids
     filtered_review_df = etl.to_dense_reviews(dataframe, dense_user_ids)
     # save data to s3 bucket
-    utils.action_parquet_to_s3(filtered_review_df, target_s3)
+    utils.load_parquet_to_s3(filtered_review_df, target_s3)
     # log the success and terminate Spark application
     logger.warn('etl job is finished')
     session.stop()
-    return None

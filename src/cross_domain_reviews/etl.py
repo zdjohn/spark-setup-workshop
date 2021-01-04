@@ -1,7 +1,7 @@
 """[summary]
     """
 
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import DataFrame, Window
 import pyspark.sql.functions as F
 
 DIG_MUSIC = 's3a://pyspark3-sample/product_category=Digital_Music_Purchase.parquet/*.snappy.parquet'
@@ -27,12 +27,24 @@ def to_overlapping_customers(source: DataFrame, target: DataFrame) -> DataFrame:
     ).select(F.col('customer_id')).distinct()
     return customer_ids
 
-    # music
+
+def to_indexed_ids(df: DataFrame, col_name: str) -> DataFrame:
+    """[summary]
+    Args:
+        df (DataFrame): [description]
+        col_name (str): [description]
+    Returns:
+        DataFrame: [description]
+    """
+    # ref: https://towardsdatascience.com/adding-sequential-ids-to-a-spark-dataframe-fa0df5566ff6
+    index_window = Window.orderBy(F.col(col_name))
+    index_df = df.withColumn(
+        f'{col_name}_index', F.row_number().over(index_window))
+    return index_df.select(F.col(f'{col_name}_index'), F.col(col_name))
 
 
 def to_overlapping_reviews(review_df: DataFrame, customer_ids: DataFrame) -> DataFrame:
     """
-
     Args:
         review_df ([type]): [description]
         DataFrame ([type]): [description]

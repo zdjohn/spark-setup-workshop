@@ -3,10 +3,9 @@ import __main__
 import json
 import configparser
 import os
-from os import environ, listdir, path
+from os import environ
 
 from pyspark import SparkConf
-from pyspark import SparkFiles
 from pyspark.sql import SparkSession, DataFrame
 from src.commons.spark_log4j import Log4j
 
@@ -26,7 +25,6 @@ def get_spark_app_config():
     return spark_conf
 
 
-# get spark session
 def start_spark(jar_packages=[], files=[]):
     # detect execution environment
     flag_debug = 'DEBUG' in environ.keys()
@@ -51,7 +49,7 @@ def start_spark(jar_packages=[], files=[]):
     return spark_session, spark_logger
 
 
-def extract_data(spark: SparkSession, path: str) -> DataFrame:
+def extract_parquet_data(spark: SparkSession, path: str) -> DataFrame:
     """Load data from Parquet file format.
     :param spark: Spark session object.
     :return: Spark DataFrame.
@@ -71,7 +69,7 @@ def action_describe(dataframe: DataFrame, columns: list) -> None:
     df_describe.show()
 
 
-def action_parquet_to_s3(dataframe: DataFrame, s3_path: str) -> None:
+def load_parquet_to_s3(dataframe: DataFrame, s3_path: str) -> None:
     """save df into s3 in parquet
 
     Args:

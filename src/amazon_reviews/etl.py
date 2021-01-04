@@ -4,7 +4,7 @@
         [type]: [description]
 """
 
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
 
 
@@ -41,8 +41,8 @@ def to_dense_user_ids(dataframe: DataFrame, floor: int, ceiling: int) -> DataFra
         DataFrame: users with right density
     """
     filtered_users = dataframe.where(
-        (dataframe.products >= floor) & (dataframe.products <= ceiling))
-    return filtered_users.select(F.col('customer_id'))
+        (dataframe.products_distinct >= floor) & (dataframe.products_distinct <= ceiling))
+    return filtered_users.select(F.col('customer_id')).distinct()
 
 
 def to_dense_reviews(dataframe: DataFrame, customer_ids: DataFrame) -> DataFrame:
