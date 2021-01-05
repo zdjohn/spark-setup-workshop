@@ -38,13 +38,16 @@ Last but not least, the size of the amazon review data is enormous, so we are go
 - What are user's review metrics (mean, min, max)
 - Extract dense user reviews based on user-item interactions by category
 
-see notebook: ./notebook/aws-review-DEA.ipynb
+see [notebook aws-review-DEA](./notebook/aws-review-DEA.ipynb), source code for the job [here](./src/amazon_reviews)
 
 ### 2. cross domain data ETL
 
 - Who are the common customers across two different product categories
 - What products dose common customer interact in each category
 - Add user and product index for training
+
+see [notebook cross-domain-reviews](./notebook/cross-domain-reviews.ipynb),
+source code for the job [here](./src/cross_domain_reviews)
 
 ### 3. Forming customer and product graphs based on user-item interaction
 

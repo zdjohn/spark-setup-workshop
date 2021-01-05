@@ -18,9 +18,12 @@ then
     rm dist_files.zip
 fi 
 
+
 pip install -t dependencies -r requirements.txt
 cd dependencies; zip -r ../dist_files.zip .
 cd ..; zip -ru dist_files.zip src -x */__pycache__/\*
+
+# create deployable artifacts
 mkdir dist
 mv dist_files.zip dist/.
 cp main.py dist/.

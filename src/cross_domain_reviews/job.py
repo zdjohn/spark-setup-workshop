@@ -44,10 +44,12 @@ def run(session, logger, **kwargs):
     target_reviews_df = etl.to_overlapping_reviews(target_df, customer_ids_df)
     target_reviews_df.cache()
 
+    # convert customer_id, product_id, into index numbers starting from 0 for training
     indexed_customer_ids = etl.to_indexed_ids(customer_ids_df, 'customer_id')
-    # todo: distinct
+
     indexed_source_product_ids = etl.to_indexed_ids(
         source_reviews_df.select('product_id').distinct(), 'product_id')
+
     indexed_target_product_ids = etl.to_indexed_ids(
         target_reviews_df.select('product_id').distinct(), 'product_id')
 

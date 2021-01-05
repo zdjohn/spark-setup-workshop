@@ -1,6 +1,3 @@
-import __main__
-
-import json
 import configparser
 import os
 from os import environ
@@ -26,6 +23,15 @@ def get_spark_app_config():
 
 
 def start_spark(jar_packages=[], files=[]):
+    """[summary]
+
+    Args:
+        jar_packages (list, optional): [description]. Defaults to [].
+        files (list, optional): [description]. Defaults to [].
+
+    Returns:
+        [type]: [description]
+    """
     # detect execution environment
     flag_debug = 'DEBUG' in environ.keys()
 
