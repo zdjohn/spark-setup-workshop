@@ -2,7 +2,7 @@
 
 In this project, I am trying to illustrate some common (key) etl tasks using spark (pyspark).
 
-I hope this project can provide a in-depth spark example for developers who want to learn spark.
+I hope this project can provide a in-depth spark example for developers who want to try and learn spark.
 
 ## About Amazon Customer Reviews Dataset
 
@@ -17,13 +17,13 @@ The data prepared here is intended for training a graph-based recommender system
 > "What are considered as classic as "Abbey Road (Beatles)" when it comes to movie?"
 > "If someone like Jazz, what types of movies would the same person like?"
 
-We will not going to dive into the ML part. (if you are interested, https://github.com/zdjohn/TRM-research-proposal here are more details)
+We are not going to dive into the ML part. (if you are interested, https://github.com/zdjohn/TRM-research-proposal here are more details)
 
 ### In this project, we are going to focusing on 3 key data ETL tasks
 
-1. We are going to **explore and analyze** the interaction between customer and products in different categories for the recommendation problem. i.e. Removing sparse data points and bot generated data.
+1. We are going to **explore and analyze** the interaction between customers and products in different categories for the recommendation problem. i.e. Removing sparse data points and bot generated data.
 
-2. We want to **extract the overlapping user's reviews** across two different product domains for transfer learning task. (i.e. Music and Video in this example)
+2. We want to **extract the overlapping user's reviews** across two different product domains for the transfer learning task. (i.e. Music and Video in this example)
 
 3. We want to **form product and customer graph** based on the user-item interactions.
 
