@@ -10,6 +10,15 @@ from src.commons.spark_log4j import Log4j
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT_DIR, 'spark.conf')
 
+SOURCE_REVIEWS_PATH = 's3a://pyspark3-sample/{source_domain}{target_domain}_reviews'
+TARGET_REVIEWS_PATH = 's3a://pyspark3-sample/{target_domain}{source_domain}_reviews'
+CUSTOMERS_INDEXED_IDS_PATH = 's3a://pyspark3-sample/{source_domain}_{target_domain}_customer_ids'
+SOURCE_PRODUCT_INDEXED_IDS_PATH = 's3a://pyspark3-sample/{source_domain}{target_domain}_product_ids'
+TARGET_PRODUCT_INDEXED_IDS_PATH = 's3a://pyspark3-sample/{target_domain}{source_domain}_product_ids'
+
+PRODUCT_EDGES_PATH = 's3a://pyspark3-sample/{domain}_{source_domain}{target_domain}_product_edges'
+CUSTOMER_EDGES_PATH = 's3a://pyspark3-sample/{domain}_{source_domain}{target_domain}_customer_edges'
+
 
 def get_spark_app_config():
     spark_conf = SparkConf()

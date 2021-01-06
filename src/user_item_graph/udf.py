@@ -1,10 +1,8 @@
 import pandas as pd
-import pyspark.sql.functions as F
 
 from pyspark.sql.functions import udf, pandas_udf
-from pyspark.sql import DataFrame
 from itertools import combinations
-from pyspark.sql.types import ArrayType, StructType, IntegerType, StructField, StringType
+from pyspark.sql.types import ArrayType, StringType
 
 
 @udf(ArrayType(StringType()))

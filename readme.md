@@ -54,6 +54,9 @@ source code for the job [here](./src/cross_domain_reviews)
 - use customer/product index as graph nodes
 - get all customer/product edges based on customer-product interaction
 
+see [notebook cross-domain-reviews](./notebook/graph-edges.ipynb),
+source code for the job [here](./src/user_item_graph)
+
 ## Testing ETL (TODO)
 
 ## Running on Prod (TODO)
