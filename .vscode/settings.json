@@ -8,5 +8,8 @@
         "--generated-members=pyspark.*",
         "--extension-pkg-whitelist=pyspark",
         "--ignored-modules=pyspark.sql.functions"
-    ]
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true
 }
