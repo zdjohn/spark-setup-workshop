@@ -1,0 +1,13 @@
+{
+    "minimum_reviews": 3,
+    "maximum_reviews": 50,
+    "s3a_path": "s3a://pyspark3-sample/",
+    "spark_app_configs":{
+        "spark.app.name":"HelloSpark",
+        "spark.master":"local[3] ",
+        "spark.sql.shuffle.partitions":"2",
+        "spark.sql.execution.arrow.pyspark.enabled":"true",
+        "spark.executor.extraJavaOptions":"-Dcom.amazonaws.services.s3.enableV4=true -Dio.netty.tryReflectionSetAccessible=true",
+        "spark.driver.extraJavaOptions":"-Dcom.amazonaws.services.s3.enableV4=true -Dio.netty.tryReflectionSetAccessible=true"
+    }
+}

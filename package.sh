@@ -27,6 +27,7 @@ cd ..; zip -ru dist_files.zip src -x */__pycache__/\*
 mkdir dist
 mv dist_files.zip dist/.
 cp main.py dist/.
+cp settings.json dist/.
 # rm -rf dependencies
 
 # upload the script and package to target s3 bucket
