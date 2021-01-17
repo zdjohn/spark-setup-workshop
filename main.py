@@ -1,12 +1,13 @@
 """[summary]
 """
 import argparse
-
+from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
 from src.commons import utils
 import src.amazon_reviews.job as reviews_job
 import src.cross_domain_reviews.job as cross_domain
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--job", help="job name", required=True)
@@ -23,6 +24,7 @@ JOB_MAPPING = {
 
 
 if __name__ == "__main__":
+    load_dotenv()
     spark_session, logger = utils.start_spark()
 
     args = parser.parse_args()
