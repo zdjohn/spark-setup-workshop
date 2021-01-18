@@ -25,13 +25,13 @@ JOB_MAPPING = {
 
 if __name__ == "__main__":
     load_dotenv()
-    spark_session, logger = utils.start_spark()
 
     args = parser.parse_args()
+    spark_session, logger, settings = utils.start_spark(**vars(args))
 
     if args.local_run:
         utils.s3_credential(spark_session)
 
     if args.job:
         run_job = JOB_MAPPING.get(args.job)
-        run_job(spark_session, logger, **vars(args))
+        run_job(spark_session, logger, settings)

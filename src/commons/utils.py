@@ -2,12 +2,13 @@ import configparser
 import os
 from os import environ
 import json
+from pyspark import SparkConf
 from pyspark.sql import SparkSession, DataFrame
 from src.commons.spark_log4j import Log4j
 
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_PATH = os.path.join(ROOT_DIR, 'spark.conf')
+# ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+# CONFIG_PATH = os.path.join(ROOT_DIR, 'spark.conf')
 
 AWS_CATEGORY_RAW = 's3a://amazon-reviews-pds/parquet/product_category={category}/*.snappy.parquet'
 
@@ -21,7 +22,7 @@ PRODUCT_EDGES_PATH = '{source_domain}{target_domain}/{domain}_product_edges'
 CUSTOMER_EDGES_PATH = '{source_domain}{target_domain}/{domain}__customer_edges'
 
 
-def load_settings(**kwargs):
+def load_settings(kwargs):
     settings = {}
     with open('./settings.json') as f:
         settings = json.load(f)
@@ -34,7 +35,7 @@ def load_settings(**kwargs):
         raise Exception("no target s3a path to save data")
 
     settings['raw_path'] = AWS_CATEGORY_RAW.format(
-        category=settings['category'])
+        category=settings.get('category', ''))
 
     # settings['target_raw_path'] = SOURCE_REVIEWS_PATH.format(
     #     target_domain=settings['target_domain'])
@@ -86,8 +87,17 @@ def s3_credential(session: SparkSession):
     hadoop_conf.set("fs.s3a.secret.key", access_key)
 
 
-def start_spark(jar_packages=[], files=[]):
+def get_spark_app_config(configs: dict):
+    spark_conf = SparkConf()
+
+    for key, val in configs.items():
+        spark_conf.set(key, val)
+    return spark_conf
+
+
+def start_spark(**kwargs):
     """[summary]
+    jar_packages=[], files=[],
 
     Args:
         jar_packages (list, optional): [description]. Defaults to [].
@@ -99,17 +109,20 @@ def start_spark(jar_packages=[], files=[]):
     # detect execution environment
     flag_debug = 'DEBUG' in environ.keys()
 
+    settings = load_settings(kwargs)
+
     spark_builder = SparkSession.builder
 
-    if flag_debug:
-        # create Spark JAR packages string
-        spark_jars_packages = ','.join(list(jar_packages))
-        spark_builder.config('spark.jars.packages', spark_jars_packages)
+    # if flag_debug:
+    # create Spark JAR packages string
+    # spark_jars_packages = ','.join(list(jar_packages))
+    # spark_builder.config('spark.jars.packages', spark_jars_packages)
 
-        spark_files = ','.join(list(files))
-        spark_builder.config('spark.files', spark_files)
+    # spark_files = ','.join(list(files))
+    # spark_builder.config('spark.files', spark_files)
 
-        # spark_builder.config(conf=spark_conf)
+    spark_conf = get_spark_app_config(settings['spark_app_configs'])
+    spark_builder.config(conf=spark_conf)
 
     # create session and retrieve Spark logger object
     spark_session = spark_builder.getOrCreate()
@@ -118,7 +131,7 @@ def start_spark(jar_packages=[], files=[]):
     if flag_debug:
         s3_credential(spark_session)
 
-    return spark_session, spark_logger
+    return spark_session, spark_logger, settings
 
 
 def extract_parquet_data(spark: SparkSession, path: str) -> DataFrame:

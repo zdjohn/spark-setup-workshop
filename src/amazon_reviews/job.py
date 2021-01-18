@@ -2,15 +2,13 @@ from src.commons import utils
 from src.amazon_reviews import etl
 
 
-def run(session, logger, **kwargs):
+def run(session, logger, settings):
     """Main ETL script definition.
     :return: None
     """
     # category = kwargs.get('category', '')
     # if not category:
     #     raise Exception('review category not defined')
-
-    settings = utils.load_settings(**kwargs)
 
     aws_review_s3_raw = settings['raw_path']
 
