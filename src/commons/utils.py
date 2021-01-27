@@ -18,8 +18,10 @@ CUSTOMERS_INDEXED_IDS_PATH = '{source_domain}{target_domain}/common_customer_ids
 SOURCE_PRODUCT_INDEXED_IDS_PATH = '{source_domain}{target_domain}/{source_domain}_product_ids'
 TARGET_PRODUCT_INDEXED_IDS_PATH = '{source_domain}{target_domain}/{target_domain}_product_ids'
 
-PRODUCT_EDGES_PATH = '{source_domain}{target_domain}/{domain}_product_edges'
-CUSTOMER_EDGES_PATH = '{source_domain}{target_domain}/{domain}__customer_edges'
+PRODUCT_EDGES_PATH = '{source_domain}{target_domain}/product_edges/'
+CUSTOMER_EDGES_PATH = '{source_domain}{target_domain}/customer_edges/'
+
+PN_SAMPLES_PATH = '{source_domain}{target_domain}/positive_negative_samples/'
 
 
 def load_settings(kwargs):
@@ -65,12 +67,13 @@ def load_settings(kwargs):
         domain=settings.get('source_domain', ''),
         source_domain=settings.get('source_domain', ''),
         target_domain=settings.get('target_domain', ''))
-    settings['target_product_edges'] = CUSTOMER_EDGES_PATH.format(
-        domain=settings.get('target_domain', ''),
+    settings['customer_edges'] = CUSTOMER_EDGES_PATH.format(
         source_domain=settings.get('source_domain', ''),
         target_domain=settings.get('target_domain', ''))
-    settings['source_product_edges'] = CUSTOMER_EDGES_PATH.format(
-        domain=settings.get('source_domain', ''),
+    settings['product_edges'] = PRODUCT_EDGES_PATH.format(
+        source_domain=settings.get('source_domain', ''),
+        target_domain=settings.get('target_domain', ''))
+    settings['pn_samples'] = PN_SAMPLES_PATH.format(
         source_domain=settings.get('source_domain', ''),
         target_domain=settings.get('target_domain', ''))
 
@@ -121,6 +124,8 @@ def start_spark(**kwargs):
     # spark_files = ','.join(list(files))
     # spark_builder.config('spark.files', spark_files)
 
+    print('getting spark session')
+
     spark_conf = get_spark_app_config(settings['spark_app_configs'])
     spark_builder.config(conf=spark_conf)
 
@@ -130,6 +135,8 @@ def start_spark(**kwargs):
 
     if flag_debug:
         s3_credential(spark_session)
+
+    print('spark session created')
 
     return spark_session, spark_logger, settings
 

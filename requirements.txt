@@ -8,7 +8,7 @@ numpy==1.19.4
     # via
     #   pandas
     #   pyarrow
-pandas==1.1.4
+pandas==1.2.1
     # via -r requirements.in
 py4j==0.10.9
     # via pyspark
@@ -20,7 +20,7 @@ python-dateutil==2.8.1
     # via pandas
 python-dotenv==0.15.0
     # via -r requirements.in
-pytz==2020.4
+pytz==2020.5
     # via pandas
 six==1.15.0
     # via python-dateutil
