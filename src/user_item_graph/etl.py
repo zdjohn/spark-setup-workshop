@@ -124,7 +124,6 @@ def to_customers_grouped_by_product(dataframe: DataFrame, customers_index: DataF
         customers_index, ['customer_id']
     ).groupby('product_id').agg(
         F.collect_set('customer_id_index').alias('customers'))
-    # TODO: add negative samples based on `customers` column
 
     return customers_by_product_df.select('product_id',
                                           udf.pandas_udf_combination('customers').alias("customers_edges"))

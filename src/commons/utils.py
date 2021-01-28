@@ -116,14 +116,6 @@ def start_spark(**kwargs):
 
     spark_builder = SparkSession.builder
 
-    # if flag_debug:
-    # create Spark JAR packages string
-    # spark_jars_packages = ','.join(list(jar_packages))
-    # spark_builder.config('spark.jars.packages', spark_jars_packages)
-
-    # spark_files = ','.join(list(files))
-    # spark_builder.config('spark.files', spark_files)
-
     print('getting spark session')
 
     spark_conf = get_spark_app_config(settings['spark_app_configs'])
