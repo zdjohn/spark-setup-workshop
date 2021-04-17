@@ -44,6 +44,7 @@ def run(session, logger, settings):
         target_reviews_df.select('product_id').distinct(), 'product_id')
 
     # save data to s3 bucket
+
     # +-----------+-----------+--------------+----------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+---------------+-----------+-----------+----+
     # |customer_id|marketplace|     review_id|product_id|product_parent|       product_title|star_rating|helpful_votes|total_votes|vine|verified_purchase|review_headline|review_body|review_date|year|
     # +-----------+-----------+--------------+----------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+---------------+-----------+-----------+----+
