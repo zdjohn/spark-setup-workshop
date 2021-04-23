@@ -23,7 +23,7 @@ def to_user_reviewed_products(reviews_dataframe: DataFrame, products_index: Data
         F.collect_set('product_id_index').alias('positives'))
 
 
-def to_edges_by_partition(products_by_customer_df: DataFrame, partition_column: str) -> DataFrame:
+def to_items_graph(products_by_customer_df: DataFrame) -> DataFrame:
     """collect set of product_ids by customer_id
     Args:
         dataframe (DataFrame):
@@ -40,31 +40,10 @@ def to_edges_by_partition(products_by_customer_df: DataFrame, partition_column: 
             |    |-- element: string (containsNull = true)
     """
     return products_by_customer_df.select(
-        partition_column,
+        'customer_id',
         F.explode(udf.pandas_udf_combination('positives')).alias("edges")
     ).select(
         F.split('edges', '-').alias("edges")).distinct()
-
-
-# def to_graph_edges(dataframe: DataFrame, partition_column: str) -> DataFrame:
-#     """
-#     return unique edges for creating graph
-#     Args:
-#         dataframe (DataFrame):
-#          root
-#             |-- <partition_column>: string (nullable = true)
-#             |-- edges: array (nullable = true)
-#             |    |-- element: string (containsNull = true)
-#         partition_column (str): [description]
-
-#     Returns:
-#         DataFrame:
-#         root
-#             |-- edges: string (nullable = true)
-#     """
-#     return dataframe.select(F.explode(partition_column).alias('edges')
-#                             ).select(F.split('edges', '-')
-#                                      ).distinct()
 
 
 def to_user_product_pairs(products_by_customer_df: DataFrame, products_index: DataFrame, partition_column: str) -> DataFrame:

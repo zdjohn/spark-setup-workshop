@@ -7,24 +7,29 @@ def run(session, logger, settings):
     get graph edges
     """
 
+    ROOT_PATH_SOURCE = f"{settings['s3a_path']}/cross_domain/{settings['source_reviews_path']}{settings['target_reviews_path']}/"
+    ROOT_PATH = f"{settings['s3a_path']}/graph/{settings['source_reviews_path']}{settings['target_reviews_path']}/"
+
     # log that main ETL job is starting
     logger.warn('etl_job is up-and-running')
     # execute ETL pipeline
 
-    source_reviews_path = f"{settings['s3a_path']}{settings['source_reviews_path']}"
-    target_reviews_path = f"{settings['s3a_path']}{settings['target_reviews_path']}"
+    source_reviews_path = f"{ROOT_PATH_SOURCE}/{settings['source_reviews_path']}/reviews"
+    target_reviews_path = f"{ROOT_PATH_SOURCE}/{settings['target_reviews_path']}/reviews"
 
-    source_product_indexed_ids_path = f"{settings['s3a_path']}{settings['source_product_indexed_ids_path']}"
-    target_product_indexed_ids_path = f"{settings['s3a_path']}{settings['target_product_indexed_ids_path']}"
+    source_product_indexed_ids_path = f"{ROOT_PATH_SOURCE}/{settings['source_reviews_path']}/items_idx"
+    target_product_indexed_ids_path = f"{ROOT_PATH_SOURCE}/{settings['target_reviews_path']}/items_idx"
 
     # read parquet files from s3
     source_reviews_df = utils.extract_parquet_data(
         session, source_reviews_path)
+
     source_product_indexed_ids_df = utils.extract_parquet_data(
         session, source_product_indexed_ids_path)
 
     target_reviews_df = utils.extract_parquet_data(
         session, target_reviews_path)
+
     target_product_indexed_ids_df = utils.extract_parquet_data(
         session, target_product_indexed_ids_path)
 
@@ -32,21 +37,12 @@ def run(session, logger, settings):
     source_products_by_customer = etl.to_user_reviewed_products(
         source_reviews_df, source_product_indexed_ids_df)
 
-    source_products_edges = etl.to_edges_by_partition(
-        source_products_by_customer,
-        'customer_id')
-
-    source_positive_negative_samples = etl.to_user_product_pairs(
-        source_products_by_customer,
-        source_product_indexed_ids_df,
-        'customer_id')
+    source_products_graph = etl.to_items_graph(source_products_by_customer)
 
     target_products_by_customer = etl.to_user_reviewed_products(
         target_reviews_df, target_product_indexed_ids_df)
 
-    target_products_edges = etl.to_edges_by_partition(
-        target_products_by_customer,
-        'customer_id')
+    target_products_graph = etl.to_items_graph(target_products_by_customer)
 
     target_positive_negative_samples = etl.to_user_product_pairs(
         target_products_by_customer,
@@ -64,12 +60,12 @@ def run(session, logger, settings):
     # +--------------+
 
     utils.load_parquet_to_s3(
-        source_products_edges,
-        f"{settings['s3a_path']}{settings['product_edges']}{settings['source_domain']}/")
+        source_products_graph,
+        f"{ROOT_PATH}/{settings['source_domain']}")
 
     utils.load_parquet_to_s3(
-        target_products_edges,
-        f"{settings['s3a_path']}{settings['product_edges']}{settings['target_domain']}/")
+        target_products_graph,
+        f"{ROOT_PATH}/{settings['target_domain']}/")
 
     # +-----------+--------+--------+
     # |customer_id|positive|negative|
@@ -80,10 +76,6 @@ def run(session, logger, settings):
     # |   10007421|   21932|   41226|
     # |   10007421|   25518|   60390|
     # +-----------+--------+--------+
-
-    utils.load_parquet_to_s3(
-        source_positive_negative_samples,
-        f"{settings['s3a_path']}{settings['pn_samples']}{settings['source_domain']}/")
 
     utils.load_parquet_to_s3(
         target_positive_negative_samples,

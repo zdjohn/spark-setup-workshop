@@ -12,7 +12,7 @@ def run(session, logger, settings):
 
     aws_review_s3_raw = settings['raw_path']
 
-    target_s3 = f"{settings['s3a_path']}{settings['category']}"
+    target_s3 = f"{settings['s3a_path']}/dense_reviews/{settings['category']}"
 
     # read parquet files from s3
     aws_review_raw = utils.extract_parquet_data(session, aws_review_s3_raw)

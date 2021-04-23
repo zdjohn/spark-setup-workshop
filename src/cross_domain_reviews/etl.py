@@ -6,23 +6,79 @@ import pyspark.sql.functions as F
 from typing import Tuple
 
 
-# DIG_MUSIC = 's3a://pyspark3-sample/product_category=Digital_Music_Purchase.parquet/*.snappy.parquet'
+def to_refined_reviews(df_reviews: DataFrame) -> DataFrame:
+    """
+    `products_distinct` is more than 3
+    and, `purchase_rate` is more than 0.5
 
-# DIG_VIDEO = 's3a://pyspark3-sample/product_category=Digital_Video_Download.parquet/*.snappy.parquet'
+    Args:
+        df_reviews (DataFrame): [description]
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+    |customer_id|product_id|marketplace|     review_id|product_parent|       product_title|star_rating|helpful_votes|total_votes|vine|verified_purchase|     review_headline|         review_body|review_date|year|products_count|products_distinct|pp_counts|reviews_count|verified_purchase_count|purchase_rate|
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+    |   10000133|B0018CCOA8|         US|R16C1VOJDDK9BT|       4675149|               Ghost|          5|            0|          0|   N|                N|          Wonderful.|When I first boug...| 2012-09-20|2012|             1|                1|        1|            1|                      0|          0.0|
+    |   10000179|B00A7ZX7BW|         US|R1Y3TPQPTXODJ6|     839345023|Pour It Up (Expli...|          1|            0|          0|   N|                Y|       not satisfied|Couldn't even dow...| 2013-01-08|2013|          null|             null|     null|         null|                   null|         null|
+    |   10000362|B0083EYC4A|         US|R2L49J8OBHCS5M|     485000348|          Next to Me|          5|            0|          0|   N|                Y|       Great song!!!|Like the title sa...| 2013-09-02|2013|             2|                2|        2|            2|                      2|          1.0|
+    |   10000393|B00DGHX1U0|         US|R31Z9DVGG6YX3U|     663209256|Don't Think They ...|          4|            0|          0|   N|                Y|         chris brown|its one of the fe...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00DJ9MIG8|         US|R1VVM3A7PJXN5N|     307133810|Get Like Me [feat...|          3|            1|          1|   N|                N|       okay not good|nelly time may ha...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B000QO9H0O|         US|R31HGI7JW33CUC|     752845439|                Home|          5|            0|          0|   N|                Y|              Genius|One of the best i...| 2013-06-06|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B008419GBQ|         US|R31RUDWKHDIYGX|     795557121|What You Won't Do...|          5|            0|          0|   N|                Y|Great Old School ...|I remember this s...| 2013-12-30|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B009E2V6LW|         US|R22DBME5285IU4|     450328699|How Many Drinks? ...|          5|            0|          0|   N|                Y|              miguel|love this song es...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00AR7L6ZO|         US|R3GQH4H61SC0QX|     395335753|         Lose to Win|          5|            1|          1|   N|                Y|Best song in a lo...|Fantasia has a hi...| 2013-01-28|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00EFWAOBY|         US|R20URYKT9MYGHO|     568296409|In The Middle Of ...|          5|            0|          0|   N|                Y|          Great Song|Great song, I lov...| 2013-08-26|2013|             6|                6|        6|            6|                      6|          1.0|
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
 
-# DIG_GAME = 's3a://pyspark3-sample/product_category=Digital_Video_Games.parquet/*.snappy.parquet'
+
+    Returns:
+        DataFrame:
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+    |customer_id|product_id|marketplace|     review_id|product_parent|       product_title|star_rating|helpful_votes|total_votes|vine|verified_purchase|     review_headline|         review_body|review_date|year|products_count|products_distinct|pp_counts|reviews_count|verified_purchase_count|purchase_rate|
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+    |   10000133|B0018CCOA8|         US|R16C1VOJDDK9BT|       4675149|               Ghost|          5|            0|          0|   N|                N|          Wonderful.|When I first boug...| 2012-09-20|2012|             1|                1|        1|            1|                      0|          0.0|
+    |   10000179|B00A7ZX7BW|         US|R1Y3TPQPTXODJ6|     839345023|Pour It Up (Expli...|          1|            0|          0|   N|                Y|       not satisfied|Couldn't even dow...| 2013-01-08|2013|          null|             null|     null|         null|                   null|         null|
+    |   10000362|B0083EYC4A|         US|R2L49J8OBHCS5M|     485000348|          Next to Me|          5|            0|          0|   N|                Y|       Great song!!!|Like the title sa...| 2013-09-02|2013|             2|                2|        2|            2|                      2|          1.0|
+    |   10000393|B00DGHX1U0|         US|R31Z9DVGG6YX3U|     663209256|Don't Think They ...|          4|            0|          0|   N|                Y|         chris brown|its one of the fe...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00DJ9MIG8|         US|R1VVM3A7PJXN5N|     307133810|Get Like Me [feat...|          3|            1|          1|   N|                N|       okay not good|nelly time may ha...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B000QO9H0O|         US|R31HGI7JW33CUC|     752845439|                Home|          5|            0|          0|   N|                Y|              Genius|One of the best i...| 2013-06-06|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B008419GBQ|         US|R31RUDWKHDIYGX|     795557121|What You Won't Do...|          5|            0|          0|   N|                Y|Great Old School ...|I remember this s...| 2013-12-30|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B009E2V6LW|         US|R22DBME5285IU4|     450328699|How Many Drinks? ...|          5|            0|          0|   N|                Y|              miguel|love this song es...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00AR7L6ZO|         US|R3GQH4H61SC0QX|     395335753|         Lose to Win|          5|            1|          1|   N|                Y|Best song in a lo...|Fantasia has a hi...| 2013-01-28|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00EFWAOBY|         US|R20URYKT9MYGHO|     568296409|In The Middle Of ...|          5|            0|          0|   N|                Y|          Great Song|Great song, I lov...| 2013-08-26|2013|             6|                6|        6|            6|                      6|          1.0|
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+
+    """
+
+    return df_reviews.where(df_reviews.products_distinct >= 3 & df_reviews.purchase_rate > 0.5 & df_reviews.star_rating > 3)
 
 
 def to_overlapping_customers(source: DataFrame, target: DataFrame) -> DataFrame:
-    """[summary]
+    """
+    get overlapping users between 2 domains
 
     Args:
-        source (DataFrame): [description]
-        target (DataFrame): [description]
+        source (DataFrame): densed review
+        target (DataFrame): densed review
+
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+    |customer_id|product_id|marketplace|     review_id|product_parent|       product_title|star_rating|helpful_votes|total_votes|vine|verified_purchase|     review_headline|         review_body|review_date|year|products_count|products_distinct|pp_counts|reviews_count|verified_purchase_count|purchase_rate|
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+    |   10000133|B0018CCOA8|         US|R16C1VOJDDK9BT|       4675149|               Ghost|          5|            0|          0|   N|                N|          Wonderful.|When I first boug...| 2012-09-20|2012|             1|                1|        1|            1|                      0|          0.0|
+    |   10000179|B00A7ZX7BW|         US|R1Y3TPQPTXODJ6|     839345023|Pour It Up (Expli...|          1|            0|          0|   N|                Y|       not satisfied|Couldn't even dow...| 2013-01-08|2013|          null|             null|     null|         null|                   null|         null|
+    |   10000362|B0083EYC4A|         US|R2L49J8OBHCS5M|     485000348|          Next to Me|          5|            0|          0|   N|                Y|       Great song!!!|Like the title sa...| 2013-09-02|2013|             2|                2|        2|            2|                      2|          1.0|
+    |   10000393|B00DGHX1U0|         US|R31Z9DVGG6YX3U|     663209256|Don't Think They ...|          4|            0|          0|   N|                Y|         chris brown|its one of the fe...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00DJ9MIG8|         US|R1VVM3A7PJXN5N|     307133810|Get Like Me [feat...|          3|            1|          1|   N|                N|       okay not good|nelly time may ha...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B000QO9H0O|         US|R31HGI7JW33CUC|     752845439|                Home|          5|            0|          0|   N|                Y|              Genius|One of the best i...| 2013-06-06|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B008419GBQ|         US|R31RUDWKHDIYGX|     795557121|What You Won't Do...|          5|            0|          0|   N|                Y|Great Old School ...|I remember this s...| 2013-12-30|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B009E2V6LW|         US|R22DBME5285IU4|     450328699|How Many Drinks? ...|          5|            0|          0|   N|                Y|              miguel|love this song es...| 2013-09-19|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00AR7L6ZO|         US|R3GQH4H61SC0QX|     395335753|         Lose to Win|          5|            1|          1|   N|                Y|Best song in a lo...|Fantasia has a hi...| 2013-01-28|2013|             6|                6|        6|            6|                      6|          1.0|
+    |   10000393|B00EFWAOBY|         US|R20URYKT9MYGHO|     568296409|In The Middle Of ...|          5|            0|          0|   N|                Y|          Great Song|Great song, I lov...| 2013-08-26|2013|             6|                6|        6|            6|                      6|          1.0|
+    +-----------+----------+-----------+--------------+--------------+--------------------+-----------+-------------+-----------+----+-----------------+--------------------+--------------------+-----------+----+--------------+-----------------+---------+-------------+-----------------------+-------------+
+
 
     Returns:
         DataFrame: [description]
     """
+
     customer_ids = source.join(
         target,
         ['customer_id']
@@ -37,6 +93,15 @@ def to_indexed_ids(df: DataFrame, col_name: str) -> DataFrame:
         col_name (str): [description]
     Returns:
         DataFrame: [description]
+    # +-----------------+-----------+
+    # |customer_id_index|customer_id|
+    # +-----------------+-----------+
+    # |                1|   10001105|
+    # |                2|   10007421|
+    # |                3|   10008274|
+    # |                4|   10010722|
+    # |                5|   10012171|
+    # +-----------------+-----------+
     """
     # ref: https://towardsdatascience.com/adding-sequential-ids-to-a-spark-dataframe-fa0df5566ff6
     index_window = Window.orderBy(F.col(col_name))
@@ -49,13 +114,12 @@ def to_overlapping_reviews(review_df: DataFrame, customer_ids: DataFrame) -> Dat
     """
     Args:
         review_df ([type]): [description]
-        DataFrame ([type]): [description]
         user_ids (DataFrame): [description]
 
     Returns:
         DataFrame: [description]
     """
-    return review_df.join(customer_ids, ["customer_id"])
+    return review_df.join(customer_ids, ["customer_id"]).select('customer_id', 'product_id')
 
     # video
 

@@ -11,28 +11,36 @@ def run(session, logger, settings):
     """Main ETL script definition.
     :return: None
     """
+    SOURCE_DENSE_REVIEWS = f"{settings['s3a_path']}/dense_reviews/{settings['source_domain']}/*.snappy.parquet"
+    TARGET_DENSE_REVIEWS = f"{settings['s3a_path']}/dense_reviews/{settings['source_domain']}/*.snappy.parquet"
+
+    ROOT_PATH = f"{settings['s3a_path']}/cross_domain/{settings['source_reviews_path']}{settings['target_reviews_path']}/"
 
     # log that main ETL job is starting
     logger.warn('etl_job is up-and-running')
     # execute ETL pipeline
 
     # read parquet files from s3
-    source_df = utils.extract_parquet_data(
-        session, f"{settings['s3a_path']}{settings['source_domain']}/*.snappy.parquet")
-    target_df = utils.extract_parquet_data(
-        session, f"{settings['s3a_path']}{settings['target_domain']}/*.snappy.parquet")
+    source_df = utils.extract_parquet_data(session, SOURCE_DENSE_REVIEWS)
+    target_df = utils.extract_parquet_data(session, TARGET_DENSE_REVIEWS)
 
     # get reviewers stats by aggregation
-    customer_ids_df = etl.to_overlapping_customers(source_df, target_df)
+    refined_source = etl.to_refined_reviews(source_df)
+    refined_target = etl.to_refined_reviews(target_df)
+
+    customer_ids_df = etl.to_overlapping_customers(
+        refined_source, refined_target)
     customer_ids_df.cache()
 
     # get user ids based on user item interaction, i.e. minimal 3 reviews, maximun 50 reviews
-    source_reviews_df = etl.to_overlapping_reviews(source_df, customer_ids_df)
-    source_reviews_df.cache()
+    source_reviews_df = etl.to_overlapping_reviews(
+        refined_source, customer_ids_df)
+    # source_reviews_df.cache()
 
     # filter reviews records based on dense user_ids
-    target_reviews_df = etl.to_overlapping_reviews(target_df, customer_ids_df)
-    target_reviews_df.cache()
+    target_reviews_df = etl.to_overlapping_reviews(
+        refined_target, customer_ids_df)
+    # target_reviews_df.cache()
 
     # convert customer_id, product_id, into index numbers starting from 0 for training
     indexed_customer_ids = etl.to_indexed_ids(customer_ids_df, 'customer_id')
@@ -42,6 +50,10 @@ def run(session, logger, settings):
 
     indexed_target_product_ids = etl.to_indexed_ids(
         target_reviews_df.select('product_id').distinct(), 'product_id')
+
+    # todo:
+    # get target extended users from its neighbors (source, target)
+    # get target extended items from its neighbors (source, target)
 
     # save data to s3 bucket
 
@@ -57,24 +69,15 @@ def run(session, logger, settings):
 
     utils.load_parquet_to_s3(
         source_reviews_df,
-        f"{settings['s3a_path']}{settings['source_reviews_path']}")
+        f"{ROOT_PATH}/{settings['source_reviews_path']}/reviews")
+
     utils.load_parquet_to_s3(
         target_reviews_df,
-        f"{settings['s3a_path']}{settings['target_reviews_path']}")
-
-    # +-----------------+-----------+
-    # |customer_id_index|customer_id|
-    # +-----------------+-----------+
-    # |                1|   10001105|
-    # |                2|   10007421|
-    # |                3|   10008274|
-    # |                4|   10010722|
-    # |                5|   10012171|
-    # +-----------------+-----------+
+        f"{ROOT_PATH}/{settings['target_reviews_path']}/reviews")
 
     utils.load_parquet_to_s3(
         indexed_customer_ids,
-        f"{settings['s3a_path']}{settings['customers_indexed_ids_path']}")
+        f"{ROOT_PATH}/users_idx")
 
     # +----------------+----------+
     # |product_id_index|product_id|
@@ -88,10 +91,11 @@ def run(session, logger, settings):
 
     utils.load_parquet_to_s3(
         indexed_source_product_ids,
-        f"{settings['s3a_path']}{settings['source_product_indexed_ids_path']}")
+        f"{ROOT_PATH}/{settings['source_reviews_path']}/items_idx")
+
     utils.load_parquet_to_s3(
         indexed_target_product_ids,
-        f"{settings['s3a_path']}{settings['target_product_indexed_ids_path']}")
+        f"{ROOT_PATH}/{settings['target_reviews_path']}/items_idx")
 
     # log the success and terminate Spark application
     logger.warn('etl job is finished')
