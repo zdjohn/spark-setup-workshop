@@ -12,9 +12,9 @@ def run(session, logger, settings):
     :return: None
     """
     SOURCE_DENSE_REVIEWS = f"{settings['s3a_path']}/dense_reviews/{settings['source_domain']}/*.snappy.parquet"
-    TARGET_DENSE_REVIEWS = f"{settings['s3a_path']}/dense_reviews/{settings['source_domain']}/*.snappy.parquet"
+    TARGET_DENSE_REVIEWS = f"{settings['s3a_path']}/dense_reviews/{settings['target_domain']}/*.snappy.parquet"
 
-    ROOT_PATH = f"{settings['s3a_path']}/cross_domain/{settings['source_reviews_path']}{settings['target_reviews_path']}/"
+    ROOT_PATH = f"{settings['s3a_path']}/cross_domain/{settings['source_domain']}{settings['target_domain']}/"
 
     # log that main ETL job is starting
     logger.warn('etl_job is up-and-running')
@@ -69,11 +69,11 @@ def run(session, logger, settings):
 
     utils.load_parquet_to_s3(
         source_reviews_df,
-        f"{ROOT_PATH}/{settings['source_reviews_path']}/reviews")
+        f"{ROOT_PATH}/{settings['source_domain']}/reviews")
 
     utils.load_parquet_to_s3(
         target_reviews_df,
-        f"{ROOT_PATH}/{settings['target_reviews_path']}/reviews")
+        f"{ROOT_PATH}/{settings['target_domain']}/reviews")
 
     utils.load_parquet_to_s3(
         indexed_customer_ids,
@@ -91,11 +91,11 @@ def run(session, logger, settings):
 
     utils.load_parquet_to_s3(
         indexed_source_product_ids,
-        f"{ROOT_PATH}/{settings['source_reviews_path']}/items_idx")
+        f"{ROOT_PATH}/{settings['source_domain']}/items_idx")
 
     utils.load_parquet_to_s3(
         indexed_target_product_ids,
-        f"{ROOT_PATH}/{settings['target_reviews_path']}/items_idx")
+        f"{ROOT_PATH}/{settings['target_domain']}/items_idx")
 
     # log the success and terminate Spark application
     logger.warn('etl job is finished')
