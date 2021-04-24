@@ -51,9 +51,7 @@ def run(session, logger, settings):
     indexed_target_product_ids = etl.to_indexed_ids(
         target_reviews_df.select('product_id').distinct(), 'product_id')
 
-    # todo:
-    # get target extended users from its neighbors (source, target)
-    # get target extended items from its neighbors (source, target)
+    # todo: get extended users/items from its neighbors (source, target)
 
     # save data to s3 bucket
 
