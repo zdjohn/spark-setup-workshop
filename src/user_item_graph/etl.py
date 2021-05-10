@@ -54,7 +54,7 @@ def to_items_graph(products_by_customer_df: DataFrame) -> DataFrame:
     edges_df = df.select(df.edges[0].cast(IntegerType()).alias('node'),
                          df.edges[1].cast(IntegerType()).alias('neighbor')).distinct()
 
-    edges_df.groupBy('node').agg(
+    return edges_df.groupBy('node').agg(
         F.collect_set('neighbor').alias('neighbors'))
 
 
