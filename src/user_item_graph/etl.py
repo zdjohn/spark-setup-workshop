@@ -1,5 +1,6 @@
 from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
+from pyspark.sql.types import IntegerType
 from src.user_item_graph import udf
 
 
@@ -35,15 +36,26 @@ def to_items_graph(products_by_customer_df: DataFrame) -> DataFrame:
         <partition_column> (str): <partition_column> column name
     Returns:
         DataFrame:
-        root
-            |-- edges: array (nullable = true)
-            |    |-- element: string (containsNull = true)
+        DataFrame[node: IntegerType, neighbors: array<IntegerType>]
+        e.g.
+        +----+--------------------+
+        |node|          neighbors|
+        +----+--------------------+
+        |   0|[18186, 8289, 171...|
+        |  10|[10268, 5209, 147...|
+        +----+--------------------+
     """
-    return products_by_customer_df.select(
+    df = products_by_customer_df.select(
         'customer_id',
         F.explode(udf.pandas_udf_combination('positives')).alias("edges")
     ).select(
-        F.split('edges', '-').alias("edges")).distinct()
+        F.split('edges', '-').alias("edges")
+    )
+    edges_df = df.select(df.edges[0].cast(IntegerType()).alias('node'),
+                         df.edges[1].cast(IntegerType()).alias('neighbor')).distinct()
+
+    edges_df.groupBy('node').agg(
+        F.collect_set('neighbor').alias('neighbors'))
 
 
 def to_user_product_pairs(products_by_customer_df: DataFrame, products_index: DataFrame, partition_column: str) -> DataFrame:
@@ -61,9 +73,13 @@ def to_user_product_pairs(products_by_customer_df: DataFrame, products_index: Da
         DataFrame:
         root
             |-- <partition_column> customer_id: string (nullable = true)
-            |-- positive: integer (nullable = true)
-            |-- negative: integer (nullable = true)
+            |-- positives: array (nullable = true)
+            |    |-- element: integer (containsNull = false)
+            |-- negatives: array (nullable = true)
+            |    |-- element: integer (containsNull = false)
     """
+
+    # shuffle and slice
     products_idx = products_index.select(
         F.collect_set('product_id_index').alias('idx_set'))
 
@@ -72,18 +88,11 @@ def to_user_product_pairs(products_by_customer_df: DataFrame, products_index: Da
     ).withColumn('all_negatives',
                  F.shuffle(F.array_except(F.col('idx_set'),
                                           F.col('positives')))
-                 ).select(F.col(partition_column),
-                          F.col('positives'),
-                          F.expr("slice(all_negatives, 1, size(positives))").alias(
-                              'negatives')
-                          ).select(partition_column,
-                                   F.explode(F.arrays_zip(
-                                       'positives', 'negatives')).alias('pair')
-                                   ).select(partition_column,
-                                            F.col('pair.positives').alias(
-                                                'positive'),
-                                            F.col('pair.negatives').alias('negative'))
-
+                 ).select(
+                     F.col(partition_column),
+                     F.col('positives'),
+                     F.expr("slice(all_negatives, 1, size(positives))").alias(
+                         'negatives'))
     return positive_and_neg
 
 

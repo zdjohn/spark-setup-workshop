@@ -22,7 +22,9 @@ def run(session, logger, settings):
 
     # get user ids based on user item interaction, i.e. minimal 3 reviews, maximun 50 reviews
     dense_user_product = etl.to_dense_product_user_ids(aws_review_raw,
-                                                       review_agg_df, settings['minimum_reviews'], settings['maximum_reviews'])
+                                                       review_agg_df,
+                                                       settings['minimum_reviews'],
+                                                       settings['maximum_reviews'])
 
     utils.load_parquet_to_s3(dense_user_product, target_s3)
     # log the success and terminate Spark application

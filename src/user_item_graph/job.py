@@ -53,11 +53,16 @@ def run(session, logger, settings):
         target_product_indexed_ids_df,
         'customer_id')
 
+    # DataFrame:
+    # root
+    #     |-- <partition_column> customer_id: string (nullable = true)
+    #     |-- positives: array (nullable = true)
+    #     |    |-- element: integer (containsNull = false)
+    #     |-- negatives: array (nullable = true)
+    #     |    |-- element: integer (containsNull = false)
+
     target_training_set = target_positive_negative_samples.join(
-        source_products_by_customer.join(
-            users_idx,
-            on=['customer_id']
-        ).withColumnRenamed(
+        source_products_by_customer.withColumnRenamed(
             'positives',
             'source_positives'),
         on=['customer_id']
@@ -74,7 +79,7 @@ def run(session, logger, settings):
     # +--------------+
 
     utils.load_parquet_to_s3(
-        source_products_by_customer.join(users_idx, on=['customer_id']),
+        source_products_by_customer,
         f"{ROOT_PATH}/user_by_source_items")
 
     utils.load_parquet_to_s3(
